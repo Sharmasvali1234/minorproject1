@@ -90,6 +90,9 @@ def index():
     return render_template('index.html')
 
 
+import os
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=10000)
+    port = int(os.environ.get('PORT', 10000))  # Use Render's PORT if available
+    app.run(debug=False, host='0.0.0.0', port=port)
+
