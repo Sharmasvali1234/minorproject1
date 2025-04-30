@@ -9,4 +9,4 @@ __pycache__/
 *.pyc
 
 # Ignore uploads (if any future files uploaded during app running)
-static/uploads/*
+
