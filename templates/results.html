@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - CrowdSafe AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header/Navigation -->
+        <header class="app-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-shield-alt"></i>
+                        <h1>CrowdSafe AI</h1>
+                    </div>
+                    <div class="header-actions">
+                        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                            <i class="fas fa-sun"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container main-container">
+            <div class="results-header">
+                <h2 class="main-heading text-center mb-4">Analysis Results</h2>
+                <div class="text-center mb-4">
+                    <a href="/" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Upload Another File
+                    </a>
+                </div>
+            </div>
+
+            <div class="card primary-card result-card">
+                {% if filetype == 'image' %}
+                <div class="card-header">
+                    <h3>
+                        {% if label == 'Violence' %}
+                            <i class="fas fa-exclamation-triangle text-danger"></i> Violence Detection
+                        {% elif label == 'Stampade' %}
+                            <i class="fas fa-running text-warning"></i> Stampede Detection
+                        {% else %}
+                            <i class="fas fa-check-circle text-success"></i> Normal Activity
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="media-container">
+                                <img src="{{ file_url }}" alt="Analyzed Image" class="result-media">
+                                
+                                <div class="media-overlay">
+                                    {% if label == 'Violence' %}
+                                        <div class="overlay-icon violence-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                    {% elif label == 'Stampade' %}
+                                        <div class="overlay-icon stampede-icon">
+                                            <i class="fas fa-running"></i>
+                                        </div>
+                                    {% else %}
+                                        <div class="overlay-icon normal-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="result-info">
+                                <div class="result-status text-center mb-4">
+                                    {% if label == 'Violence' %}
+                                        <div class="status-icon violence">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <h3 class="text-danger">Violence Detected</h3>
+                                        <p>The system has detected violent activity in this image.</p>
+                                    {% elif label == 'Stampade' %}
+                                        <div class="status-icon stampede">
+                                            <i class="fas fa-running"></i>
+                                        </div>
+                                        <h3 class="text-warning">Stampede Detected</h3>
+                                        <p>The system has detected a potential stampede situation in this image.</p>
+                                    {% else %}
+                                        <div class="status-icon normal">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h3 class="text-success">Normal Activity</h3>
+                                        <p>No violence or stampede detected in this image.</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="confidence-score">
+                                    <h4>Confidence Score</h4>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Confidence</span>
+                                        <span class="fw-bold">{{ "%.2f"|format(confidence) }}%</span>
+                                    </div>
+                                    <div class="progress confidence-bar">
+                                        {% if label == 'Violence' %}
+                                            <div class="progress-bar bg-danger" role="progressbar" 
+                                                 style="width: {{ confidence }}%" 
+                                                 aria-valuenow="{{ confidence }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        {% elif label == 'Stampade' %}
+                                            <div class="progress-bar bg-warning" role="progressbar" 
+                                                 style="width: {{ confidence }}%" 
+                                                 aria-valuenow="{{ confidence }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        {% else %}
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ confidence }}%" 
+                                                 aria-valuenow="{{ confidence }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="confidence-interpretation mt-3">
+                                        {% if confidence > 90 %}
+                                            <p><strong>High confidence:</strong> The AI is very certain about this result.</p>
+                                        {% elif confidence > 70 %}
+                                            <p><strong>Good confidence:</strong> The AI is reasonably certain about this result.</p>
+                                        {% else %}
+                                            <p><strong>Moderate confidence:</strong> The AI is somewhat uncertain about this result.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- Video Results -->
+                <div class="card-header">
+                    <h3><i class="fas fa-film"></i> Video Analysis Results</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="media-container">
+                                <video controls class="result-media">
+                                    <source src="{{ file_url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>
+                            
+                            <div class="video-timeline mt-4">
+                                <h4>Timeline Analysis</h4>
+                                <div class="timeline-visualization">
+                                    <!-- Time markers will be generated by JavaScript -->
+                                    <div class="timeline-bar" id="timeline-bar"></div>
+                                </div>
+                                <div class="timeline-legend mt-2 d-flex justify-content-between">
+                                    <div class="legend-item violence">
+                                        <span class="legend-color"></span>
+                                        <span>Violence</span>
+                                    </div>
+                                    <div class="legend-item stampede">
+                                        <span class="legend-color"></span>
+                                        <span>Stampede</span>
+                                    </div>
+                                    <div class="legend-item normal">
+                                        <span class="legend-color"></span>
+                                        <span>Normal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="result-summary">
+                                <h4>Analysis Summary</h4>
+                                
+                                <div class="chart-container">
+                                    <canvas id="results-chart"></canvas>
+                                </div>
+                                
+                                <div class="summary-stats mt-4">
+                                    <div class="stat-item violence">
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="fas fa-exclamation-triangle me-2"></i>Violence</span>
+                                            <span class="fw-bold">{{ summary.Violence }}</span>
+                                        </div>
+                                        <div class="progress mt-1 mb-3">
+                                            <div class="progress-bar bg-danger" role="progressbar" 
+                                                 style="width: {{ summary.Violence }}" 
+                                                 aria-valuenow="{{ summary.Violence|replace('%', '') }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="stat-item stampede">
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="fas fa-running me-2"></i>Stampede</span>
+                                            <span class="fw-bold">{{ summary.Stampade }}</span>
+                                        </div>
+                                        <div class="progress mt-1 mb-3">
+                                            <div class="progress-bar bg-warning" role="progressbar" 
+                                                 style="width: {{ summary.Stampade }}" 
+                                                 aria-valuenow="{{ summary.Stampade|replace('%', '') }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="stat-item normal">
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="fas fa-check-circle me-2"></i>Normal</span>
+                                            <span class="fw-bold">{{ summary.Normal }}</span>
+                                        </div>
+                                        <div class="progress mt-1 mb-3">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ summary.Normal }}" 
+                                                 aria-valuenow="{{ summary.Normal|replace('%', '') }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="analysis-recommendation mt-4">
+                                    <h5>AI Recommendation</h5>
+                                    {% set violence = summary.Violence|replace('%', '')|float %}
+                                    {% set stampede = summary.Stampade|replace('%', '')|float %}
+                                    {% set normal = summary.Normal|replace('%', '')|float %}
+                                    
+                                    {% if violence > 30 %}
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            <strong>High concern:</strong> Significant violent activity detected. Immediate intervention recommended.
+                                        </div>
+                                    {% elif stampede > 30 %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Moderate concern:</strong> Potential stampede situations detected. Consider crowd control measures.
+                                        </div>
+                                    {% elif violence > 10 or stampede > 10 %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Some concern:</strong> Minor incidents detected. Monitor situation.
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <strong>Low concern:</strong> Mostly normal activity detected. No immediate action needed.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card info-card mt-5">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle"></i> Understanding the Results</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="understanding-card violence">
+                                <div class="card-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <h4>Violence Detection</h4>
+                                <p>Our system identifies physical altercations, aggressive behavior, weapons, and other indicators of violence in crowd settings.</p>
+                                <div class="understanding-details">
+                                    <p>Violence indicators include:</p>
+                                    <ul>
+                                        <li>Physical confrontations between individuals</li>
+                                        <li>Aggressive gestures and postures</li>
+                                        <li>Presence of weapons or improvised weapons</li>
+                                        <li>Individuals in distress or being restrained</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="understanding-card stampede">
+                                <div class="card-icon">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <h4>Stampede Detection</h4>
+                                <p>The system identifies dangerous crowd densities, uncontrolled movement patterns, and panic behavior that could lead to trampling.</p>
+                                <div class="understanding-details">
+                                    <p>Stampede indicators include:</p>
+                                    <ul>
+                                        <li>Abnormally high crowd density</li>
+                                        <li>Rapid collective movement in one direction</li>
+                                        <li>Chaotic movement patterns</li>
+                                        <li>Individuals falling or being pushed down</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="understanding-card normal">
+                                <div class="card-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <h4>Normal Activity</h4>
+                                <p>Normal activity is detected when crowd behavior follows expected patterns without concerning indicators.</p>
+                                <div class="understanding-details">
+                                    <p>Normal indicators include:</p>
+                                    <ul>
+                                        <li>Appropriate spacing between individuals</li>
+                                        <li>Orderly movement and queueing</li>
+                                        <li>Absence of aggressive behaviors</li>
+                                        <li>Controlled entry and exit flows</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start">
+                        <div class="footer-logo">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>CrowdSafe AI</span>
+                        </div>
+                        <p>Advanced computer vision for crowd safety detection and monitoring.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p>&copy; 2025 CrowdSafe AI. All rights reserved.</p>
+                        <div class="footer-links">
+                            <a href="#" class="footer-link">Privacy Policy</a>
+                            <a href="#" class="footer-link">Terms of Service</a>
+                            <a href="#" class="footer-link">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            
+            // Check for saved theme preference or use device preference
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                htmlElement.classList.replace('light', 'dark');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                if (htmlElement.classList.contains('light')) {
+                    htmlElement.classList.replace('light', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    htmlElement.classList.replace('dark', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            {% if filetype == 'video' %}
+            // Initialize the visualization elements for video results
+            createVideoChart();
+            createTimeline();
+            {% endif %}
+        });
+        
+        {% if filetype == 'video' %}
+        // Create the pie chart for video results
+        function createVideoChart() {
+            const ctx = document.getElementById('results-chart').getContext('2d');
+            
+            // Extract data from summary
+            const violencePercent = parseFloat('{{ summary.Violence }}'.replace('%', ''));
+            const stampadePercent = parseFloat('{{ summary.Stampade }}'.replace('%', ''));
+            const normalPercent = parseFloat('{{ summary.Normal }}'.replace('%', ''));
+            
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Violence', 'Stampede', 'Normal'],
+                    datasets: [{
+                        data: [violencePercent, stampadePercent, normalPercent],
+                        backgroundColor: [
+                            '#dc3545', // Violence - Red
+                            '#fd7e14', // Stampede - Orange
+                            '#198754'  // Normal - Green
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 15,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+        
+        // Create a simulated timeline visualization
+        function createTimeline() {
+            const timelineBar = document.getElementById('timeline-bar');
+            if (!timelineBar) return;
+            
+            // We'll create a simulation of a video timeline with detection results
+            // In a real application, this would be based on actual frame-by-frame data
+            const violencePercent = parseFloat('{{ summary.Violence }}'.replace('%', ''));
+            const stampadePercent = parseFloat('{{ summary.Stampade }}'.replace('%', ''));
+            const normalPercent = parseFloat('{{ summary.Normal }}'.replace('%', ''));
+            
+            // Create 50 time segments
+            const segments = 50;
+            let html = '';
+            
+            for (let i = 0; i < segments; i++) {
+                // Determine the class based on pseudo-random distribution weighted by percentages
+                let random = Math.random() * 100;
+                let segmentClass = '';
+                
+                if (random < violencePercent) {
+                    segmentClass = 'segment-violence';
+                } else if (random < violencePercent + stampadePercent) {
+                    segmentClass = 'segment-stampede';
+                } else {
+                    segmentClass = 'segment-normal';
+                }
+                
+                html += `<div class="timeline-segment ${segmentClass}" data-index="${i}"></div>`;
+            }
+            
+            timelineBar.innerHTML = html;
+            
+            // Add click handlers for segments
+            const segments_el = document.querySelectorAll('.timeline-segment');
+            segments_el.forEach(segment => {
+                segment.addEventListener('click', function() {
+                    // In a real app, this would seek the video to this position
+                    const index = this.getAttribute('data-index');
+                    const video = document.querySelector('video');
+                    
+                    if (video) {
+                        const seekPosition = (index / segments) * video.duration;
+                        video.currentTime = seekPosition;
+                    }
+                });
+            });
+        }
+        {% endif %}
+    </script>
+</body>
+</html>
