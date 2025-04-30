@@ -22,7 +22,7 @@ access_log_format = '%(r)s %(s)s %(b)s %(L)s'
 
 # Set maximum request body size
 limit_request_line = 0
-limit_request_fields = a100
+limit_request_fields = 100
 limit_request_field_size = 0
 
 # Configure worker process handling
